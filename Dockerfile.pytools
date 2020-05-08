@@ -1,0 +1,31 @@
+# Dockerfile.pytools
+
+FROM ubuntu:20.04
+MAINTAINER jconlin@ufl.edu
+
+ARG uid
+ARG gid
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# install sudo and vim
+RUN apt-get update && apt-get -y install sudo && apt-get install -y nmap vim
+
+# python env, C/C++ and tools installation
+RUN apt update
+RUN apt upgrade
+RUN apt install -y x11-apps python3-pip python3-virtualenvwrapper python3-tk python3-venv
+RUN apt install -y cmake g++ gcc gdb build-essential
+
+# create a new user
+RUN mkdir -p /home/developer
+RUN echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd
+RUN echo "developer:x:${uid}:" >> /etc/group
+RUN echo "developer ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/developer
+RUN chmod 0440 /etc/sudoers.d/developer
+RUN chown ${uid}:${gid} -R /home/developer
+
+USER developer
+ENV HOME /home/developer
+ENV DEBIAN_FRONTEND=interactive
+CMD ["/bin/sh"]
